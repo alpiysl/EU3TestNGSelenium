@@ -1,0 +1,5 @@
+Hello Selenium
+
+/Users/alpi/IdeaProjects/EU3TestNGSelenium/src/test/resources/textfile.txt
+
+src/test/resources/textfile.txt
