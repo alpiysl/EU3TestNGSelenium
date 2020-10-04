@@ -4,7 +4,9 @@ import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
 import com.cybertek.utilities.ConfigurationReader;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class ExtentDemoTest {
 
@@ -40,7 +42,29 @@ public class ExtentDemoTest {
         reports.setSystemInfo("Browser", ConfigurationReader.get("browser"));
         reports.setSystemInfo("OS",System.getProperty("os.name"));
 
+    }
 
+    @Test
+    public void test1(){
+
+        //give name to current
+        extentTest = reports.createTest("TC1 Login as Driver Test");
+
+        //test steps
+        extentTest.info("Open chrome");
+        extentTest.info("Go to this URL");
+        extentTest.info("Enter username and password");
+        extentTest.info("click login");
+        extentTest.info("Verify logged in");
+
+        //pass()-> marks the test as passed
+        extentTest.pass("TC1 is passed");
 
     }
+
+    @AfterMethod
+    public void td(){
+        reports.flush();
+    }
+
 }

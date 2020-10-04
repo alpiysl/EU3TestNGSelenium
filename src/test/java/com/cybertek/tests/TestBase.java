@@ -1,14 +1,22 @@
 package com.cybertek.tests;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
 import com.cybertek.pages.LoginPage;
+import com.cybertek.utilities.BrowserUtils;
 import com.cybertek.utilities.ConfigurationReader;
 import com.cybertek.utilities.Driver;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class TestBase {
@@ -16,7 +24,32 @@ public class TestBase {
     protected WebDriver driver;
     protected Actions actions;
     protected WebDriverWait wait;
+    protected ExtentReports report;
+    protected ExtentHtmlReporter htmlReporter;
+    protected ExtentTest extentTest;
 
+    @BeforeTest
+    public void setupTest() {
+        report = new ExtentReports();
+
+        //create a report path
+        String projectPath = System.getProperty("user.dir");
+        String path = projectPath + "/test-output/report.html";
+
+        //initialize the html reporter with the report path
+        htmlReporter = new ExtentHtmlReporter(path);
+
+        //attach the html report to report object
+        report.attachReporter(htmlReporter);
+
+        //title in report
+        htmlReporter.config().setReportName("Vytrack Smoke Test");
+
+        //set environment information
+        report.setSystemInfo("Environment", "QA");
+        report.setSystemInfo("Browser", ConfigurationReader.get("browser"));
+        report.setSystemInfo("OS", System.getProperty("os.name"));
+    }
 
     @BeforeMethod
     public void setUp(){
@@ -28,11 +61,31 @@ public class TestBase {
         driver.get(ConfigurationReader.get("url"));
 
     }
-
+    //ITestResult class describes th result of a test in TestNG
     @AfterMethod
-    public void tearDown() throws InterruptedException {
+    public void tearDown(ITestResult result) throws InterruptedException, IOException {
+        //if test fails
+        if(result.getStatus()==ITestResult.FAILURE){
+            //record the name of failed test case
+            extentTest.fail(result.getName());
+
+            //take ss and return location of ss
+            String ssPath = BrowserUtils.getScreenshot(result.getName());
+
+            //add your ss to your report
+            extentTest.addScreenCaptureFromPath(ssPath);
+
+            //capture the exception and but inside the report
+            extentTest.fail(result.getThrowable());
+        }
         Thread.sleep(2000);
         Driver.closeDriver();
     }
+
+    @AfterTest
+    public void td(){
+        report.flush();
+    }
+
 
 }
